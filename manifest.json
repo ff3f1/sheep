@@ -1,24 +1,20 @@
 {
-  "host": "ff3f1.github.io",
-  "name": "Sheep Jam Pro",
-  "shortName": "SheepJam",
-  "startUrl": "/",
+  "name": "Sheep Jam 3D Isometric",
+  "short_name": "Sheep3D",
+  "start_url": "./index.html",
   "display": "standalone",
-  "themeColor": "#0b132b",
-  "backgroundColor": "#0b132b",
-  "navigationColor": "#0b132b",
-  "navigationColorDark": "#0b132b",
-  "navigationDividerColor": "#0b132b",
-  "navigationDividerColorDark": "#0b132b",
-  "appId": "com.sheep.jampro.game",
-  "launcherName": "Sheep Jam",
-  "splashScreenFadeOutDuration": 300,
-  "signingKey": {
-    "path": "./android.keystore",
-    "alias": "android"
-  },
-  "useBrowserHistorySupport": true,
-  "features": {},
-  "alphaContributors": [],
-  "generatorApp": "bubblewrap-cli"
+  "background_color": "#0b132b",
+  "theme_color": "#0b132b",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/color/192/sheep.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/color/512/sheep.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }
