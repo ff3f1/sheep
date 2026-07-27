@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sheep Jam 3D Isometric</title>
+    <title>Sheep Jam Pro</title>
     <link rel="manifest" href="./manifest.json">
     <style>
         * {
@@ -26,7 +26,7 @@
         }
         #game-container {
             position: relative;
-            width: 380px;
+            width: 360px;
             height: 640px;
             background: linear-gradient(135deg, #1c2541, #0b132b);
             border-radius: 24px;
@@ -58,7 +58,7 @@
             pointer-events: none;
         }
         h1 {
-            font-size: 30px;
+            font-size: 32px;
             margin-bottom: 10px;
             color: #6fffe9;
             text-shadow: 0 0 10px rgba(111,255,233,0.5);
@@ -69,7 +69,7 @@
             margin-bottom: 30px;
             text-align: center;
             padding: 0 20px;
-            font-size: 15px;
+            font-size: 16px;
         }
         .btn {
             background: #5bc0be;
@@ -96,61 +96,60 @@
             font-weight: bold;
             color: #6fffe9;
         }
-        #isometric-board {
+        #grid {
             position: relative;
-            width: 330px;
-            height: 380px;
-            perspective: 800px;
-            margin-top: 20px;
-        }
-        /* Изометрическая сцена */
-        .isometric-plane {
-            position: absolute;
-            width: 260px;
-            height: 260px;
-            left: 35px;
-            top: 50px;
-            transform: rotateX(55deg) rotateZ(-45deg);
-            transform-style: preserve-style;
-            background: rgba(28, 37, 65, 0.8);
+            width: 300px;
+            height: 420px;
+            background: #141c2e;
+            border-radius: 16px;
+            overflow: hidden;
             border: 3px solid #5bc0be;
-            border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-        /* Элементы в изометрии */
-        .iso-tile {
+        .sheep {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            border: 1px dashed rgba(91, 192, 190, 0.2);
-        }
-        .iso-sheep {
-            position: absolute;
-            width: 48px;
-            height: 48px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 22px;
-            box-shadow: -5px 5px 15px rgba(0,0,0,0.5);
-            transform: rotateZ(45deg) rotateX(-55deg); /* Компенсация поворота плоскости для лица игроку */
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
             z-index: 5;
-            border: 2px solid rgba(255,255,255,0.4);
+            border: 2px solid rgba(255,255,255,0.6);
         }
-        .iso-sheep:active {
-            transform: rotateZ(45deg) rotateX(-55deg) scale(0.85);
+        .sheep span {
+            font-size: 22px;
+            line-height: 1;
         }
-        .dir-arrow {
-            font-size: 10px;
+        .arrow {
+            font-size: 11px;
             font-weight: bold;
-            background: rgba(0,0,0,0.6);
-            padding: 1px 4px;
-            border-radius: 4px;
-            margin-top: -4px;
+            background: rgba(0,0,0,0.5);
+            padding: 1px 5px;
+            border-radius: 6px;
+            margin-top: 1px;
+        }
+        .exit-gate {
+            position: absolute;
+            background: #3a506b;
+            border: 2px dashed #6fffe9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 2;
+            border-radius: 6px;
+        }
+        @keyframes bounce-shake {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12) rotate(3deg); }
+        }
+        .shake {
+            animation: bounce-shake 0.3s ease-in-out;
         }
     </style>
 </head>
@@ -159,15 +158,15 @@
     <div id="game-container">
         <!-- Стартовое меню -->
         <div id="menu-screen" class="screen">
-            <h1>Sheep Jam 3D</h1>
-            <p>Изометрическая головоломка! Выводите овечек в 4 направлениях.</p>
+            <h1>Sheep Jam</h1>
+            <p>Увлекательная головоломка с овечками! Выводите их в свободные ворота.</p>
             <button class="btn" onclick="startGame()">ИГРАТЬ</button>
         </div>
 
         <!-- Экран победы -->
         <div id="win-screen" class="screen hidden">
             <h1>Уровень пройден! 🎉</h1>
-            <p>Превосходно! Пробка полностью разобрана.</p>
+            <p>Великолепно! Все овечки на свободе.</p>
             <button class="btn" onclick="nextLevel()">ДАЛЕЕ</button>
         </div>
 
@@ -177,34 +176,33 @@
             <span id="score-indicator">Очки: 0</span>
         </div>
 
-        <!-- Игровая изометрическая зона -->
-        <div id="isometric-board">
-            <div class="isometric-plane" id="plane"></div>
-        </div>
+        <!-- Игровое поле -->
+        <div id="grid"></div>
 
         <div style="font-size: 12px; color: #5bc0be; text-align: center;">
-            Кликайте на овечек, чтобы запустить их по стрелке
+            Кликайте на овечку, чтобы она побежала к воротам
         </div>
     </div>
 
     <script>
-        const GRID_SIZE = 4; // 4x4 сетка
-        const STEP_PX = 65;  // Шаг в пикселях для изометрии
+        const COLS = 5;
+        const ROWS = 7;
+        const CELL = 60; // 300 / 5
 
         let currentLevel = 1;
         let score = 0;
         let sheepList = [];
         let isAnimating = false;
 
-        // 4 направления движения
+        // 4 направления выходов по периметру
         const directions = [
-            { dx: 0, dy: -1, symbol: '⬆️', name: 'up' },
-            { dx: 0, dy: 1,  symbol: '⬇️', name: 'down' },
-            { dx: -1, dy: 0, symbol: '⬅️', name: 'left' },
-            { dx: 1, dy: 0,  symbol: '➡️', name: 'right' }
+            { dx: 0, dy: -1, symbol: '⬆️', targetY: -1, gateX: 2, gateY: 0, w: 60, h: 8 }, // Верх
+            { dx: 0, dy: 1,  symbol: '⬇️', targetY: ROWS, gateX: 2, gateY: ROWS - 1, w: 60, h: 8 }, // Низ
+            { dx: -1, dy: 0, symbol: '⬅️', targetX: -1, gateX: 0, gateY: 3, w: 8, h: 60 }, // Лево
+            { dx: 1, dy: 0,  symbol: '➡️', targetX: COLS, gateX: COLS - 1, gateY: 3, w: 8, h: 60 }  // Право
         ];
 
-        const sheepColors = ['#ff5964', '#35a7ff', '#fdca40', '#70c1b3', '#b5179e'];
+        const colors = ['#ff5964', '#35a7ff', '#fdca40', '#70c1b3', '#b5179e'];
 
         function startGame() {
             document.getElementById('menu-screen').classList.add('hidden');
@@ -218,41 +216,40 @@
         }
 
         function initLevel() {
-            const plane = document.getElementById('plane');
-            plane.innerHTML = '';
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
             sheepList = [];
             isAnimating = false;
 
             document.getElementById('level-indicator').innerText = `Уровень: ${currentLevel}`;
 
-            // Генерация сетки подложки
-            for (let x = 0; x < GRID_SIZE; x++) {
-                for (let y = 0; y < GRID_SIZE; y++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'iso-tile';
-                    tile.style.left = (x * STEP_PX + 5) + 'px';
-                    tile.style.top = (y * STEP_PX + 5) + 'px';
-                    plane.appendChild(tile);
-                }
-            }
+            // Рисуем ворота выхода
+            directions.forEach(d => {
+                const gate = document.createElement('div');
+                gate.className = 'exit-gate';
+                gate.style.width = d.w + 'px';
+                gate.style.height = d.h + 'px';
+                gate.style.left = (d.gateX * CELL + (d.w === 8 ? (d.dx > 0 ? CELL - 8 : 0) : 0)) + 'px';
+                gate.style.top = (d.gateY * CELL + (d.h === 8 ? (d.dy > 0 ? CELL - 8 : 0) : 0)) + 'px';
+                gate.innerHTML = `<span style="font-size:9px;">${d.symbol}</span>`;
+                grid.appendChild(gate);
+            });
 
-            // Создаем овечек (от 4 до 8 штук в зависимости от уровня)
-            let count = Math.min(3 + currentLevel, 12);
+            // Генерация овечек (от 4 до 9 штук)
+            let count = Math.min(3 + currentLevel, 10);
             let positions = [];
 
             for (let i = 0; i < count; i++) {
                 let rx, ry;
                 let attempts = 0;
                 do {
-                    rx = Math.floor(Math.random() * GRID_SIZE);
-                    ry = Math.floor(Math.random() * GRID_SIZE);
+                    rx = Math.floor(Math.random() * COLS);
+                    ry = Math.floor(Math.random() * (ROWS - 2)) + 1;
                     attempts++;
                 } while (positions.some(p => p.x === rx && p.y === ry) && attempts < 50);
 
                 if (attempts < 50) {
                     positions.push({x: rx, y: ry});
-                    
-                    // Выбираем случайное направление для овечки
                     let dir = directions[Math.floor(Math.random() * directions.length)];
 
                     let sheep = {
@@ -260,7 +257,7 @@
                         x: rx,
                         y: ry,
                         dir: dir,
-                        color: sheepColors[i % sheepColors.length]
+                        color: colors[i % colors.length]
                     };
                     sheepList.push(sheep);
                     renderSheep(sheep);
@@ -269,28 +266,28 @@
         }
 
         function renderSheep(sheep) {
-            const plane = document.getElementById('plane');
+            const grid = document.getElementById('grid');
             const el = document.createElement('div');
-            el.className = 'iso-sheep';
+            el.className = 'sheep';
             el.id = `sheep-${sheep.id}`;
             el.style.backgroundColor = sheep.color;
-            el.style.left = (sheep.x * STEP_PX + 8) + 'px';
-            el.style.top = (sheep.y * STEP_PX + 8) + 'px';
-            el.innerHTML = `<span>🐑</span><div class="dir-arrow">${sheep.dir.symbol}</div>`;
+            el.style.left = (sheep.x * CELL + 3) + 'px';
+            el.style.top = (sheep.y * CELL + 3) + 'px';
+            el.innerHTML = `<span>🐑</span><div class="arrow">${sheep.dir.symbol}</div>`;
 
             el.onclick = () => tryMove(sheep);
-            plane.appendChild(el);
+            grid.appendChild(el);
         }
 
         function tryMove(sheep) {
             if (isAnimating) return;
 
-            // Проверяем свободность пути в выбранном направлении до границ поля (-1 или GRID_SIZE)
+            // Проверяем путь в выбранном направлении до упора
             let pathClear = true;
             let cx = sheep.x + sheep.dir.dx;
             let cy = sheep.y + sheep.dir.dy;
 
-            while (cx >= 0 && cx < GRID_SIZE && cy >= 0 && cy < GRID_SIZE) {
+            while (cx >= 0 && cx < COLS && cy >= 0 && cy < ROWS) {
                 if (sheepList.some(s => s.id !== sheep.id && s.x === cx && s.y === cy)) {
                     pathClear = false;
                     break;
@@ -302,37 +299,32 @@
             const el = document.getElementById(`sheep-${sheep.id}`);
 
             if (!pathClear) {
-                // Анимация толчка (не может пройти)
-                el.style.transform = `rotateZ(45deg) rotateX(-55deg) scale(1.15)`;
-                setTimeout(() => {
-                    el.style.transform = `rotateZ(45deg) rotateX(-55deg) scale(1)`;
-                }, 200);
+                el.classList.add('shake');
+                setTimeout(() => el.classList.remove('shake'), 300);
                 return;
             }
 
-            // Успешный выход за границы сетки
+            // Успешный побег за границы
             isAnimating = true;
-            
-            // Вычисляем точку вылета за пределы плоскости
-            sheep.x += sheep.dir.dx * (GRID_SIZE + 1);
-            sheep.y += sheep.dir.dy * (GRID_SIZE + 1);
+            sheep.x += sheep.dir.dx * (COLS + 1);
+            sheep.y += sheep.dir.dy * (ROWS + 1);
 
-            el.style.transition = 'left 0.35s ease-in, top 0.35s ease-in, opacity 0.35s ease-in';
-            el.style.left = (sheep.x * STEP_PX + 8) + 'px';
-            el.style.top = (sheep.y * STEP_PX + 8) + 'px';
+            el.style.transition = 'left 0.3s ease-in, top 0.3s ease-in, opacity 0.3s ease-in';
+            el.style.left = (sheep.x * CELL + 3) + 'px';
+            el.style.top = (sheep.y * CELL + 3) + 'px';
             el.style.opacity = '0';
 
             setTimeout(() => {
                 el.remove();
                 sheepList = sheepList.filter(s => s.id !== sheep.id);
-                score += 20;
+                score += 15;
                 document.getElementById('score-indicator').innerText = `Очки: ${score}`;
                 isAnimating = false;
 
                 if (sheepList.length === 0) {
                     document.getElementById('win-screen').classList.remove('hidden');
                 }
-            }, 350);
+            }, 300);
         }
     </script>
 </body>
