@@ -1,4 +1,4 @@
-name: Blackwell CPU voice smoke test
+name: Blackwell portable speech engine integration test
 on:
   push:
     branches: [blackwell-voice-test]
@@ -27,21 +27,32 @@ jobs:
           torch.set_num_threads(2)
           model = torch.package.PackageImporter("model.pt").load_pickle("tts_models", "model")
           model.to(torch.device("cpu"))
-          text = "Это проверка русской озвучки. Голос создаётся на облачном процессоре, без домашнего компьютера."
+          text = "Ты бы подсек сейчас? Смотри: окунь уже рядом. Но интерес — ещё не поклёвка. Пока первый лёд не окреп, лови без риска. Рыбалка Клюёт! В РуСторе. Ссылка в описании."
           with torch.inference_mode():
               wav = model.apply_tts(text=text, speaker="ru_roman", sample_rate=48000)
           audio = wav.detach().cpu().numpy().reshape(-1)
           assert np.isfinite(audio).all()
-          assert 2 < len(audio)/48000 < 30
+          assert 2 < len(audio)/48000 < 40
           assert np.sqrt(np.mean(audio**2)) > 0.005
           sf.write("output/voice.wav", audio, 48000, subtype="PCM_16")
           info = {"model":"v5_cis_base","speaker":"ru_roman","duration":len(audio)/48000,"sample_rate":48000,"peak":float(np.abs(audio).max()),"rms":float(np.sqrt(np.mean(audio**2))),"bytes":Path("output/voice.wav").stat().st_size}
           Path("output/result.json").write_text(json.dumps(info,indent=2))
           print(json.dumps(info))
           PY
+      - name: Package portable model for offline testing
+        run: |
+          sha256sum model.pt > output/model.sha256
+          ls -lh model.pt
       - uses: actions/upload-artifact@v4
         with:
           name: blackwell-voice-smoke-test
           path: output/
           retention-days: 1
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blackwell-portable-model
+          path: model.pt
+          retention-days: 1
+          compression-level: 0
           if-no-files-found: error
